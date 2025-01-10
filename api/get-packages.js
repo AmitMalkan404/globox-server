@@ -2,7 +2,7 @@ import { db } from "../utils/firebase";
 
 export default async function handler(req, res) {
   try {
-    const snapshot = await db.collection("packages").get();
+    const snapshot = await db.collection("packages").where("status",">=",0).get();
 
     // עיבוד המסמכים למערך
     const packages = snapshot.docs.map((doc) => ({

@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       res: `packages updated successfully with ${
         Object.keys(updatedPackages).length
-      }`,
+      } packages`,
     });
   } else {
     res.status(405).json({ error: "Method not allowed" });
