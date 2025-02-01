@@ -2,7 +2,7 @@ import { db } from "../utils/firebase";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { packageId, address, description, status, coordinates } = req.body;
+    const { packageId, address, description, status, coordinates, uid } = req.body;
 
     // בדיקת קלט
     if (!packageId || status < 0) {
@@ -17,6 +17,7 @@ export default async function handler(req, res) {
         description,
         status,
         coordinates,
+        uid,
         createdAt: new Date().toISOString(),
       });
 

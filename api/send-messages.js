@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     }
 
     let filteredPackages = packages.filter((pckg) => {
-      return pckg.coordinates.length === 0;
+      return pckg.coordinates?.length === 0;
     });
 
     const filteredMessages = mapMessagesWithFirebaseId(
