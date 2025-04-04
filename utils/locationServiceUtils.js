@@ -1,9 +1,11 @@
 export function extractAddressFromText(message) {
   // Regex strictly for Hebrew street -> number -> city
+  const cleanedMessage = cleanGenericWords(message)
+
   const addressPattern = /([א-ת\s]+?)\s(\d+),?\s([א-ת\s]+?)(?=$|[\n.,])/g;
   let match;
 
-  while ((match = addressPattern.exec(message)) !== null) {
+  while ((match = addressPattern.exec(cleanedMessage)) !== null) {
     const street = match[1].trim();
     const number = match[2].trim();
     const city = match[3].trim();
@@ -21,6 +23,16 @@ export function extractAddressFromText(message) {
     contains_address: false,
     address: null,
   };
+}
+
+function cleanGenericWords(text) {
+  const genericWords = [
+    'חנות', 'סניף', 'ליד', 'מול', 'תחנת דלק',
+    'מרכז', 'בניין', 'קניון', 'מכולת'
+  ];
+
+  const pattern = new RegExp(`(?:${genericWords.join('|')})\\s`, 'g');
+  return text.replace(pattern, '');
 }
 
 export async function getLatLngWithBing(addressName) {
