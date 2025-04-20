@@ -36,18 +36,18 @@ function cleanGenericWords(text) {
 }
 
 export async function getLatLngWithBing(addressName) {
-    try {
-      const response = await fetch(
-        `http://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(addressName)}&key=${process.env.BING_MAP_API}`
-      );
-      const data = await response.json(); // ניתוח התגובה לפורמט JSON
-  
-      // בדיקה אם יש תוצאות
-      if (data.resourceSets?.[0]?.estimatedTotal > 0) {
-        return data.resourceSets[0].resources[0].point.coordinates; // החזרת הקואורדינטות
-      }
-      return []; // אין תוצאות
-    } catch (error) {
-      throw `Cannot fetch geo location from external API (Bing). Please try again later. Further details: ${error}`;
+  try {
+    const response = await fetch(
+      `http://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(addressName)}&key=${process.env.BING_MAP_API}`
+    );
+    const data = await response.json(); // ניתוח התגובה לפורמט JSON
+
+    // בדיקה אם יש תוצאות
+    if (data.resourceSets?.[0]?.estimatedTotal > 0) {
+      return data.resourceSets[0].resources[0].point.coordinates; // החזרת הקואורדינטות
     }
+    return []; // אין תוצאות
+  } catch (error) {
+    throw `Cannot fetch geo location from external API (Bing). Please try again later. Further details: ${error}`;
   }
+}

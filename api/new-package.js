@@ -18,6 +18,7 @@ export default async function handler(req, res) {
         status,
         coordinates,
         uid,
+        postOfficeCode,
         createdAt: new Date().toISOString(),
       });
 

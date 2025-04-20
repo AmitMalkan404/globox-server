@@ -3,11 +3,11 @@ import {
   extractAddressFromText,
   getLatLngWithBing,
 } from "../utils/locationServiceUtils";
+import { extractInternalCode } from "../utils/packagesUtils";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const snapshot = await db.collection("packages").get();
-
     // עיבוד המסמכים למערך
     const packages = snapshot.docs.map((doc) => ({
       id: doc.id, // ה-ID שנוצר על ידי Firebase
@@ -51,17 +51,24 @@ export default async function handler(req, res) {
 
         // if arrived
         if (addressRes.contains_address) {
+
+          // if the message contains the post office code
+          // then we need to extract it and save it in the database
+          let internalCode = extractInternalCode(pckg.message);
+
           updatedPackages[pckg.firebaseId] = {
             address: addressRes.address,
             coordinates: [],
             status: 2,
+            postOfficeCode: internalCode,
           };
         } else {
-          // if not Arrived yet
+          // if not arrived yet then we need to save the package with empty address, coordinates and no post office code
           updatedPackages[pckg.firebaseId] = {
             address: "",
             coordinates: [],
             status: 1,
+            postOfficeCode: '',
           };
         }
       }
