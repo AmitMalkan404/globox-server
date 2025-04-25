@@ -28,20 +28,20 @@ export default async function handler(req, res) {
       // מחיקת כל המסמכים שמכילים את packageId (למקרה שיש יותר מאחד)
       snapshot.forEach(async (doc) => {
         
-        // await db.collection("packages").doc(doc.id).delete(); // זה בשביל למחוק
-        // res
-        //   .status(200)
-        //   .json({
-        //     message: `Document with ID ${doc.id} and packageId ${packageId} deleted successfully.`,
-        //   });
-
-        const docRef = db.collection("packages").doc(doc.id); // בשביל לעדכן ל1-
-        await docRef.update({ status: -1 }); // בשביל לעדכן ל1-
+        await db.collection("packages").doc(doc.id).delete(); // זה בשביל למחוק
         res
           .status(200)
           .json({
-            message: `Status for documents with packageId ${packageId} updated to -1.`,
+            message: `Document with ID ${doc.id} and packageId ${packageId} deleted successfully.`,
           });
+
+        // const docRef = db.collection("packages").doc(doc.id); // בשביל לעדכן ל1-
+        // await docRef.update({ status: -1 }); // בשביל לעדכן ל1-
+        // res
+        //   .status(200)
+        //   .json({
+        //     message: `Status for documents with packageId ${packageId} updated to -1.`,
+        //   });
       });
     } catch (error) {
       console.error(`Error updating document ${firebaseId}:`, error);
