@@ -1,6 +1,6 @@
 export function extractAddressFromText(message) {
   // Regex strictly for Hebrew street -> number -> city
-  const cleanedMessage = cleanGenericWords(message)
+  const cleanedMessage = cleanGenericWords(message);
 
   const addressPattern = /([א-ת\s]+?)\s(\d+),?\s([א-ת\s]+?)(?=$|[\n.,])/g;
   let match;
@@ -27,18 +27,27 @@ export function extractAddressFromText(message) {
 
 function cleanGenericWords(text) {
   const genericWords = [
-    'חנות', 'סניף', 'ליד', 'מול', 'תחנת דלק',
-    'מרכז', 'בניין', 'קניון', 'מכולת'
+    "חנות",
+    "סניף",
+    "ליד",
+    "מול",
+    "תחנת דלק",
+    "מרכז",
+    "בניין",
+    "קניון",
+    "מכולת",
   ];
 
-  const pattern = new RegExp(`(?:${genericWords.join('|')})\\s`, 'g');
-  return text.replace(pattern, '');
+  const pattern = new RegExp(`(?:${genericWords.join("|")})\\s`, "g");
+  return text.replace(pattern, "");
 }
 
 export async function getLatLngWithBing(addressName) {
   try {
     const response = await fetch(
-      `http://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(addressName)}&key=${process.env.BING_MAP_API}`
+      `http://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(
+        addressName
+      )}&key=${process.env.BING_MAP_API}`
     );
     const data = await response.json(); // ניתוח התגובה לפורמט JSON
 
@@ -49,5 +58,43 @@ export async function getLatLngWithBing(addressName) {
     return []; // אין תוצאות
   } catch (error) {
     throw `Cannot fetch geo location from external API (Bing). Please try again later. Further details: ${error}`;
+  }
+}
+
+export async function extractAddressAndLocalCodeFromMessage(message) {
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: process.env.GROQ_SYSTEM_ROLE_CONTENT },
+          { role: "user", content: message },
+        ],
+      }),
+    });
+    const data = await res.json();
+
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("No content in response from Groq");
+    }
+
+    // Remove code block markers and trim whitespace
+    const cleanContent = content.replace(/```(\w*\n)?|```/g, '').trim();
+    const parsed = JSON.parse(cleanContent);
+
+    return {
+      address: parsed.address || null,
+      internalCode: parsed.internalCode || null,
+      pickupPoint: parsed.pickupPoint || null,
+    };
+  } catch (error) {
+    console.error("Error fetching address and local code:", error);
+    throw new Error("Failed to fetch address and local code:", error);
   }
 }

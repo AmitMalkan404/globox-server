@@ -25,6 +25,7 @@ export const updateFirebaseData = async (data) => {
           coordinates: packageData.coordinates,
           status: packageData.status,
           postOfficeCode : packageData.postOfficeCode,
+          pickupPointName: packageData.pickupPointName,
         });
   
         console.log(`Document with ID ${firebaseId} updated successfully`);
