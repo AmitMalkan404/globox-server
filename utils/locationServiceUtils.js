@@ -42,6 +42,12 @@ function cleanGenericWords(text) {
   return text.replace(pattern, "");
 }
 
+/**
+ * Retrieves latitude and longitude coordinates for a given address using the Bing Maps API.
+ * @param {string} addressName - The address to geocode.
+ * @returns {Promise<number[]>} An array containing [latitude, longitude] if found, or an empty array if not found.
+ * @throws Will throw an error if the Bing Maps API request fails.
+ */
 export async function getLatLngWithBing(addressName) {
   try {
     const response = await fetch(
@@ -61,6 +67,13 @@ export async function getLatLngWithBing(addressName) {
   }
 }
 
+/**
+ * Extracts address, internal code, and pickup point from a message using the Groq API.
+ * @param {string} message - The message to analyze.
+ * @returns {Promise<{address: string|null, internalCode: string|null, pickupPoint: string|null}>} 
+ *   An object containing the extracted address, internal code, and pickup point (all may be null if not found).
+ * @throws Will throw an error if the Groq API request fails or the response is invalid.
+ */
 export async function extractAddressAndLocalCodeFromMessage(message) {
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {

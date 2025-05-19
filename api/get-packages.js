@@ -6,7 +6,6 @@ export default async function handler(req, res) {
       const uid = req.body;
       const snapshot = await db
         .collection("packages")
-        .where("status", ">=", 0)
         .where("uid", "==", uid)
         .orderBy("status")
         .get();
