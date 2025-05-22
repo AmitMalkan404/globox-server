@@ -11,8 +11,11 @@ const updatedPackages = {};
  * @param {string[]} messages - Array of message strings to process.
  * @returns {Promise<number>} The number of updated packages.
  */
-export const updatePackagesData = async (messages) => {
-  const snapshot = await db.collection("packages").get();
+export const updatePackagesData = async (uid, messages) => {
+  const snapshot = await db
+    .collection("packages")
+    .where("uid", "==", uid)
+    .get();
 
   // Process documents into an array
   const packages = snapshot.docs.map((doc) => ({
@@ -27,14 +30,7 @@ export const updatePackagesData = async (messages) => {
       .json({ error: "Invalid input. Expected an array of messages." });
   }
 
-  const filteredPackages = packages.filter(
-    (pckg) => pckg.coordinates?.length === 0 || pckg.coordinates?.length === 2
-  );
-
-  const filteredMessages = mapMessagesWithFirebaseId(
-    filteredPackages,
-    messages
-  );
+  const filteredMessages = mapMessagesWithFirebaseId(packages, messages);
 
   for (const pckg of filteredMessages) {
     // Skip if the package already has an address
@@ -44,7 +40,7 @@ export const updatePackagesData = async (messages) => {
       );
       continue;
     }
-    await updatePackageDataFromMessage(pckg.message, pckg.firebaseId);
+    if (pckg.message) await updatePackageDataFromMessage(pckg.message, pckg.firebaseId);
     const deliveryStatus = await getPackageDeliveryStatus(pckg.packageId);
 
     updatedPackages[pckg.firebaseId] = {
@@ -54,7 +50,7 @@ export const updatePackagesData = async (messages) => {
   }
 
   await updateFirebaseData(updatedPackages);
-  
+
   return updateFirebaseData.length;
 };
 
@@ -84,31 +80,26 @@ export const updatePackageDataFromMessage = async (message, firebaseId) => {
 };
 
 /**
- * Maps messages to their corresponding Firebase package IDs.
- * @param {Object[]} packages - Array of package objects from Firebase.
- * @param {string[]} messages - Array of message strings.
- * @returns {Array<{firebaseId: string, packageId: string, message: string}>} 
- *   An array of objects, each containing the Firebase ID, package ID, and the original message.
+ * Maps each package from Firebase to its corresponding message by matching the packageId within the message text.
+ * @param {Object[]} packages - Array of package objects from Firebase, each containing at least an id and packageId.
+ * @param {string[]} messages - Array of message strings to search for package IDs.
+ * @returns {Array<{firebaseId: string, packageId: string, message: string|null}>} An array of objects, each containing the Firebase ID, package ID, and the matched message (or null if not found).
  */
 export const mapMessagesWithFirebaseId = (packages, messages) => {
   const packageMap = packages.reduce((map, pkg) => {
-    map[pkg.packageId] = pkg.id; // Store firebaseId by packageId
+    map[pkg.packageId] = pkg.id;
     return map;
   }, {});
 
-  // Map messages with the corresponding firebaseId
-  return messages
-    .filter((message) =>
-      Object.keys(packageMap).some((id) => message.includes(id))
-    )
-    .map((message) => {
-      const matchedId = Object.keys(packageMap).find((id) =>
-        message.includes(id)
-      );
-      return {
-        firebaseId: packageMap[matchedId], // Corresponding Firebase ID
-        packageId: matchedId, // Package ID
-        message, // Original message
-      };
-    });
+  return packages.map((pkg) => {
+    const matchingMessage = messages.find((message) =>
+      message.includes(pkg.packageId)
+    );
+
+    return {
+      firebaseId: pkg.id,
+      packageId: pkg.packageId,
+      message: matchingMessage || null,
+    };
+  });
 };

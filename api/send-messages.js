@@ -3,8 +3,8 @@ import { updatePackagesData } from "../utils/messageProcessUtils";
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
-      const messages = req.body;
-      const updatedPackagesCount = await updatePackagesData(messages);
+      const {uid, messages} = req.body;
+      const updatedPackagesCount = await updatePackagesData(uid, messages);
 
       res.status(200).json({
         res: `Packages updated successfully with ${updatedPackagesCount} packages`,
