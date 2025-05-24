@@ -37,7 +37,6 @@ export default async function handler(req, res) {
     description: description || "",
     postOfficeCode: postOfficeCode || "",
     pickupPointName: pickupPointName || "",
-    status: typeof status === "number" ? status : -1,
     coordinates: coordinates || [],
     uid: uid || "",
     eStatus: eStatus || "",
