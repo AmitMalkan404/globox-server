@@ -76,6 +76,7 @@ export const updatePackageDataFromMessage = async (message, firebaseId) => {
     coordinates: addressAndInternalCode.address ? latLng : [],
     pickupPointName: addressAndInternalCode.pickupPoint || "",
     postOfficeCode: addressAndInternalCode.internalCode || "",
+    arrivalMsg: addressAndInternalCode.address? message: "",
   };
 };
 

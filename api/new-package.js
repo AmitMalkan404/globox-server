@@ -11,7 +11,6 @@ export default async function handler(req, res) {
     description,
     postOfficeCode,
     pickupPointName,
-    status,
     coordinates,
     uid,
     eStatus,
@@ -48,6 +47,7 @@ export default async function handler(req, res) {
     contactDetails: contactDetails || "",
     originCountry: originCountry || "",
     destCountry: destCountry || "",
+    arrivalMsg: "",
     createdAt: new Date().toISOString(),
   };
 
