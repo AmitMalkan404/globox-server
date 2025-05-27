@@ -7,7 +7,6 @@ export default async function handler(req, res) {
       const snapshot = await db
         .collection("packages")
         .where("uid", "==", uid)
-        .orderBy("status")
         .get();
 
       // עיבוד המסמכים למערך

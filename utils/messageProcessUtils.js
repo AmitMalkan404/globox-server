@@ -34,7 +34,7 @@ export const updatePackagesData = async (uid, messages) => {
 
   for (const pckg of filteredMessages) {
     // Skip if the package already has an address
-    if (updatedPackages[pckg.firebaseId]?.address?.length > 0) {
+    if (updatedPackages[pckg.firebaseId]?.address?.length > 0 && updatedPackages[pckg.firebaseId]?.coordinates?.length > 0) {
       console.log(
         `Skipping package ${pckg.firebaseId} as it already has an address.`
       );
@@ -61,7 +61,8 @@ export const updatePackagesData = async (uid, messages) => {
  * @param {string} firebaseId - The Firebase document ID for the package.
  * @returns {Promise<void>} Resolves when the update is complete.
  */
-export const updatePackageDataFromMessage = async (message, firebaseId) => {
+export const updatePackageDataFromMessage = async (rawMessage, firebaseId) => {
+  const message = cleanDeliveryMessage(rawMessage);
   const addressAndInternalCode = await extractAddressAndLocalCodeFromMessage(
     message
   );
@@ -104,3 +105,21 @@ export const mapMessagesWithFirebaseId = (packages, messages) => {
     };
   });
 };
+
+/**
+ * Cleans a delivery message by removing asterisks, underscores, and emojis,
+ * normalizing multiple spaces to a single space, and trimming whitespace.
+ *
+ * @param {string} raw - The raw message string to be cleaned.
+ * @returns {string} The cleaned message string.
+ */
+export function cleanDeliveryMessage(raw) {
+  return raw
+    // Remove asterisks and underscores
+    .replace(/[*_]/g, '')
+    // Remove emojis (Unicode emoji range)
+    .replace(/[\u{1F300}-\u{1FAD6}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu, '')
+    // Normalize multiple spaces to a single space
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
