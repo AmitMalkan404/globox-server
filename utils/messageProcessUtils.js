@@ -6,12 +6,14 @@ import { getPackageDeliveryStatus } from "../utils/packagesUtils";
 const updatedPackages = {};
 
 /**
- * Updates package data in Firebase based on an array of messages.
- * Extracts address and coordinates from messages and updates the corresponding packages.
+ * Updates all packages for a specific user based on an array of messages.
+ * Fetches all packages for the given user ID, matches each package to a message,
+ * extracts address and coordinates, and updates the corresponding package records.
+ * @param {string} uid - The user ID whose packages should be updated.
  * @param {string[]} messages - Array of message strings to process.
  * @returns {Promise<number>} The number of updated packages.
  */
-export const updatePackagesData = async (uid, messages) => {
+export const updateUserPackagesFromMessages = async (uid, messages) => {
   const snapshot = await db
     .collection("packages")
     .where("uid", "==", uid)
@@ -30,17 +32,38 @@ export const updatePackagesData = async (uid, messages) => {
       .json({ error: "Invalid input. Expected an array of messages." });
   }
 
+  return processPackagesWithMessages(packages, messages);
+};
+
+/**
+ * Processes and updates multiple packages with the latest message and delivery status information.
+ *
+ * This function maps messages to their corresponding packages, updates package data
+ * from messages if necessary, retrieves the latest delivery status, and updates the
+ * package data in Firebase. It is designed for multiusage scenarios where multiple
+ * packages and messages need to be processed in bulk.
+ *
+ * @async
+ * @param {Array<Object>} packages - The list of package objects to be updated.
+ * @param {Array<Object>} messages - The list of message objects to be mapped and processed.
+ * @returns {Promise<number>} The number of packages updated.
+ */
+export const processPackagesWithMessages = async (packages, messages) => {
   const filteredMessages = mapMessagesWithFirebaseId(packages, messages);
 
   for (const pckg of filteredMessages) {
     // Skip if the package already has an address
-    if (updatedPackages[pckg.firebaseId]?.address?.length > 0 && updatedPackages[pckg.firebaseId]?.coordinates?.length > 0) {
+    if (
+      updatedPackages[pckg.firebaseId]?.address?.length > 0 &&
+      updatedPackages[pckg.firebaseId]?.coordinates?.length > 0
+    ) {
       console.log(
         `Skipping package ${pckg.firebaseId} as it already has an address.`
       );
       continue;
     }
-    if (pckg.message) await updatePackageDataFromMessage(pckg.message, pckg.firebaseId);
+    if (pckg.message)
+      await updatePackageDataFromMessage(pckg.message, pckg.firebaseId);
     const deliveryStatus = await getPackageDeliveryStatus(pckg.packageId);
 
     updatedPackages[pckg.firebaseId] = {
@@ -72,13 +95,22 @@ export const updatePackageDataFromMessage = async (rawMessage, firebaseId) => {
     var latLng = await getLatLngWithBing(addressAndInternalCode.address);
   }
 
-  updatedPackages[firebaseId] = {
-    address: addressAndInternalCode.address || "",
-    coordinates: addressAndInternalCode.address ? latLng : [],
-    pickupPointName: addressAndInternalCode.pickupPoint || "",
-    postOfficeCode: addressAndInternalCode.internalCode || "",
-    arrivalMsg: addressAndInternalCode.address? message: "",
-  };
+  updatedPackages[firebaseId] = {};
+  if (addressAndInternalCode.address) {
+    updatedPackages[firebaseId].address = addressAndInternalCode.address;
+    updatedPackages[firebaseId].arrivalMsg = message;
+  }
+  if (latLng && latLng.length > 0) {
+    updatedPackages[firebaseId].coordinates = latLng;
+  }
+  if (addressAndInternalCode.pickupPoint) {
+    updatedPackages[firebaseId].pickupPointName =
+      addressAndInternalCode.pickupPoint;
+  }
+  if (addressAndInternalCode.internalCode) {
+    updatedPackages[firebaseId].postOfficeCode =
+      addressAndInternalCode.internalCode;
+  }
 };
 
 /**
@@ -114,12 +146,17 @@ export const mapMessagesWithFirebaseId = (packages, messages) => {
  * @returns {string} The cleaned message string.
  */
 export function cleanDeliveryMessage(raw) {
-  return raw
-    // Remove asterisks and underscores
-    .replace(/[*_]/g, '')
-    // Remove emojis (Unicode emoji range)
-    .replace(/[\u{1F300}-\u{1FAD6}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu, '')
-    // Normalize multiple spaces to a single space
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  return (
+    raw
+      // Remove asterisks and underscores
+      .replace(/[*_]/g, "")
+      // Remove emojis (Unicode emoji range)
+      .replace(
+        /[\u{1F300}-\u{1FAD6}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu,
+        ""
+      )
+      // Normalize multiple spaces to a single space
+      .replace(/\s{2,}/g, " ")
+      .trim()
+  );
 }

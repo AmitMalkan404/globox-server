@@ -1,4 +1,5 @@
 import { db } from "../utils/firebase";
+import { processPackagesWithMessages } from "../utils/messageProcessUtils";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -53,7 +54,7 @@ export default async function handler(req, res) {
 
   try {
     const docRef = await db.collection("packages").add(packageData);
-
+    await processPackagesWithMessages([{ ...packageData, id: docRef.id }], []);
     return res.status(201).json({
       message: "Package added successfully!",
       firebaseId: docRef.id,
