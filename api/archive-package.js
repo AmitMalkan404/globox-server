@@ -1,3 +1,4 @@
+import { firestore } from "firebase-admin";
 import { db } from "../utils/firebase";
 
 export default async function handler(req, res) {
@@ -11,11 +12,12 @@ export default async function handler(req, res) {
       }
 
       const packageId = packageToArchive.packageId;
+      const firebaseId = packageToArchive.firestoreId || "";
 
       // שליפת המסמך לפי packageId
       const snapshot = await db
         .collection("packages")
-        .where("packageId", "==", packageId)
+        .doc(firebaseId)
         .get();
 
       // בדיקה אם המסמך קיים
@@ -25,24 +27,12 @@ export default async function handler(req, res) {
         return;
       }
 
-      // מחיקת כל המסמכים שמכילים את packageId (למקרה שיש יותר מאחד)
-      snapshot.forEach(async (doc) => {
-        
-        await db.collection("packages").doc(doc.id).delete(); // זה בשביל למחוק
-        res
+      await db.collection("packages").doc(firebaseId).delete();
+      res
           .status(200)
           .json({
-            message: `Document with ID ${doc.id} and packageId ${packageId} deleted successfully.`,
+            message: `Document with ID ${firebaseId} and packageId ${packageId} deleted successfully.`,
           });
-
-        // const docRef = db.collection("packages").doc(doc.id); // בשביל לעדכן ל1-
-        // await docRef.update({ status: -1 }); // בשביל לעדכן ל1-
-        // res
-        //   .status(200)
-        //   .json({
-        //     message: `Status for documents with packageId ${packageId} updated to -1.`,
-        //   });
-      });
     } catch (error) {
       console.error(`Error updating document ${firebaseId}:`, error);
       res.status(500).json({ error: "Failed to delete document" });
