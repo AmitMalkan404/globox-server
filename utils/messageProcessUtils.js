@@ -49,14 +49,14 @@ export const updateUserPackagesFromMessages = async (uid, messages) => {
  * @returns {Promise<number>} The number of packages updated.
  */
 export const processPackagesWithMessages = async (packages, messages) => {
-  const filteredMessages = mapMessagesWithFirebaseId(packages, messages);
+  const filteredMessages = matchPackagesToMessages(packages, messages);
 
   for (const pckg of filteredMessages) {
-    // Skip if the package already has an address
     if (
       updatedPackages[pckg.firebaseId]?.address?.length > 0 &&
       updatedPackages[pckg.firebaseId]?.coordinates?.length > 0
     ) {
+    // Skip if the package already has an address
       console.log(
         `Skipping package ${pckg.firebaseId} as it already has an address.`
       );
@@ -80,7 +80,7 @@ export const processPackagesWithMessages = async (packages, messages) => {
 /**
  * Updates a single package's data from a message.
  * Extracts address, coordinates, pickup point, and post office code from the message.
- * @param {string} message - The message containing package info.
+ * @param {string} rawMessage - The message containing package info.
  * @param {string} firebaseId - The Firebase document ID for the package.
  * @returns {Promise<void>} Resolves when the update is complete.
  */
@@ -119,12 +119,7 @@ export const updatePackageDataFromMessage = async (rawMessage, firebaseId) => {
  * @param {string[]} messages - Array of message strings to search for package IDs.
  * @returns {Array<{firebaseId: string, packageId: string, message: string|null}>} An array of objects, each containing the Firebase ID, package ID, and the matched message (or null if not found).
  */
-export const mapMessagesWithFirebaseId = (packages, messages) => {
-  const packageMap = packages.reduce((map, pkg) => {
-    map[pkg.packageId] = pkg.id;
-    return map;
-  }, {});
-
+export const matchPackagesToMessages = (packages, messages) => {
   return packages.map((pkg) => {
     const matchingMessage = messages.find((message) =>
       message.includes(pkg.packageId)
