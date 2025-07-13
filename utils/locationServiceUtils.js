@@ -55,22 +55,50 @@ export async function getLatLngWithBing(addressName) {
         addressName
       )}&key=${process.env.BING_MAP_API}`
     );
-    const data = await response.json(); // ניתוח התגובה לפורמט JSON
+    const data = await response.json();
 
-    // בדיקה אם יש תוצאות
     if (data.resourceSets?.[0]?.estimatedTotal > 0) {
-      return data.resourceSets[0].resources[0].point.coordinates; // החזרת הקואורדינטות
+      return data.resourceSets[0].resources[0].point.coordinates;
     }
-    return []; // אין תוצאות
+    return []; 
   } catch (error) {
     throw `Cannot fetch geo location from external API (Bing). Please try again later. Further details: ${error}`;
   }
 }
 
 /**
+ * Retrieves the latitude and longitude for a given address using the OpenCage Geocoding API.
+ *
+ * @async
+ * @param {string} addressName - The address to geocode.
+ * @returns {Promise<number[]>} A promise that resolves to an array containing [latitude, longitude] if found, or an empty array if not found or on error.
+ */
+export async function getLatLngWithOpenCage(addressName) {
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+    addressName
+  )}&key=${process.env.OPEN_CAGE_API_KEY}&language=he`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.results && data.results.length > 0) {
+      const { lat, lng } = data.results[0].geometry;
+      return [lat, lng];
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.error("שגיאה ב־OpenCage:", err);
+    return [];
+  }
+}
+
+
+/**
  * Extracts address, internal code, and pickup point from a message using the Groq API.
  * @param {string} message - The message to analyze.
- * @returns {Promise<{address: string|null, internalCode: string|null, pickupPoint: string|null}>} 
+ * @returns {Promise<{address: string|null, internalCode: string|null, pickupPoint: string|null}>}
  *   An object containing the extracted address, internal code, and pickup point (all may be null if not found).
  * @throws Will throw an error if the Groq API request fails or the response is invalid.
  */
@@ -98,7 +126,7 @@ export async function extractAddressAndLocalCodeFromMessage(message) {
     }
 
     // Remove code block markers and trim whitespace
-    const cleanContent = content.replace(/```(\w*\n)?|```/g, '').trim();
+    const cleanContent = content.replace(/```(\w*\n)?|```/g, "").trim();
     const parsed = JSON.parse(cleanContent);
 
     return {

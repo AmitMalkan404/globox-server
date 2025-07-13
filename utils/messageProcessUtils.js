@@ -1,7 +1,7 @@
-import { db, updateFirebaseData } from "../utils/firebase";
-import { getLatLngWithBing } from "../utils/locationServiceUtils";
-import { extractAddressAndLocalCodeFromMessage } from "../utils/locationServiceUtils";
-import { getPackageDeliveryStatus } from "../utils/packagesUtils";
+import { db, updateFirebaseData } from "../utils/firebase.js";
+import { getLatLngWithOpenCage } from "../utils/locationServiceUtils.js";
+import { extractAddressAndLocalCodeFromMessage } from "../utils/locationServiceUtils.js";
+import { getPackageDeliveryStatus } from "../utils/packagesUtils.js";
 
 const updatedPackages = {};
 
@@ -92,7 +92,7 @@ export const updatePackageDataFromMessage = async (rawMessage, firebaseId) => {
 
   if (addressAndInternalCode.address) {
     // If address is found
-    var latLng = await getLatLngWithBing(addressAndInternalCode.address);
+    var latLng = await getLatLngWithOpenCage(addressAndInternalCode.address);
   }
 
   updatedPackages[firebaseId] = {};

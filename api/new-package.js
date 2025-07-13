@@ -1,5 +1,5 @@
-import { db } from "../utils/firebase";
-import { processPackagesWithMessages } from "../utils/messageProcessUtils";
+import { db } from '../utils/firebase.js';
+import { processPackagesWithMessages } from "../utils/messageProcessUtils.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

@@ -1,4 +1,4 @@
-import { trackingIdChanges } from './../state/tracking-updates';
+import { trackingIdChanges } from './../state/tracking-updates.js';
 
 
 /**

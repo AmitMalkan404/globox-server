@@ -1,5 +1,5 @@
-import { updateUserPackagesFromMessages } from "../utils/messageProcessUtils";
-import { trackingIdChanges } from "./../state/tracking-updates";
+import { updateUserPackagesFromMessages } from "../utils/messageProcessUtils.js";
+import { trackingIdChanges } from "./../state/tracking-updates.js";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {

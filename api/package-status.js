@@ -1,4 +1,4 @@
-import { getPackageDeliveryStatus } from "../utils/packagesUtils"; // Adjust the import path as needed
+import { getPackageDeliveryStatus } from "../utils/packagesUtils.js"; // Adjust the import path as needed
 
 export default async function handler(req, res) {
     const { packageId } = req.query;
