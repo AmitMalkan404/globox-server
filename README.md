@@ -1,11 +1,13 @@
 # Globox Server
 
 ## Overview
+
 Globox Server is the backend for the Globox application, providing essential APIs and services for managing and tracking packages efficiently. This project is built using **Node.js** and incorporates **Express.js** for server-side functionality. The backend integrates with external APIs for advanced package tracking capabilities and stores data using **Firebase**.
 
 ---
 
 ## Features
+
 - **Package Management**: Add, update, and delete package information.
 - **API Integration**: Fetch package status from external services.
 - **Data Storage**: Save user and package data securely in Firebase.
@@ -17,25 +19,31 @@ Globox Server is the backend for the Globox application, providing essential API
 ## Installation
 
 ### Prerequisites
+
 Ensure you have the following installed:
+
 - **Firebase CLI** (to manage and deploy Firebase projects)
 - **Node.js** (v16 or later)
 - **npm** (Node Package Manager)
 
 ### Steps
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/AmitMalkan404/globox-server.git
    cd globox-server
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Configure the environment variables:
    Create a `.env` file in the root directory and set the required variables:
+
    ```env
    PORT=3000
    FIREBASE_CONFIG=your-firebase-config
@@ -46,11 +54,18 @@ Ensure you have the following installed:
    Replace `your-firebase-config` with the Firebase configuration JSON.
 
 4. Start the server:
+
    ```bash
    npm start
    ```
 
-5. Access the application:
+5. Deploy the server:
+
+   ```bash
+   npm run deploy
+   ```
+
+6. Access the application:
    Open your browser and navigate to `http://localhost:3000`.
 
 ---
@@ -58,10 +73,12 @@ Ensure you have the following installed:
 ## API Endpoints
 
 ### **Authentication**
+
 - `POST /auth/register`: Register a new user.
 - `POST /auth/login`: Log in and receive a JWT.
 
 ### **Packages**
+
 - `GET /packages`: Retrieve all packages.
 - `POST /packages`: Add a new package.
 - `GET /packages/:id`: Get details of a specific package.
@@ -69,19 +86,25 @@ Ensure you have the following installed:
 - `DELETE /packages/:id`: Remove a package.
 
 ### **Tracking**
+
 - `GET /tracking/:trackingId`: Get the tracking status of a package.
 
 ---
 
 ## Development
+
 ### Running in Development Mode
-Use the following command for development with live reload:
+
+Use the following command to start the local development server:
+
 ```bash
-npm run dev
+npm start
 ```
 
 ### Linting
+
 Ensure code quality with:
+
 ```bash
 npm run lint
 ```
@@ -89,7 +112,9 @@ npm run lint
 ---
 
 ## Contributing
+
 Contributions are welcome! Please follow these steps:
+
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature-name`).
 3. Commit your changes (`git commit -m 'Add feature-name'`).
@@ -99,9 +124,11 @@ Contributions are welcome! Please follow these steps:
 ---
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
 ## Contact
+
 For inquiries or support, please reach out to [Amit Malkan](mailto:amit.malkan404@example.com).

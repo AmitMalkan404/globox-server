@@ -1,9 +1,9 @@
 import { db } from "../utils/firebase.js";
 
 export default async function handler(req, res) {
-  if (req.method === "POST") {
+  if (req.method === "GET") {
     try {
-      const uid = req.body;
+      const { uid } = req.query;
       const snapshot = await db
         .collection("packages")
         .where("uid", "==", uid)
